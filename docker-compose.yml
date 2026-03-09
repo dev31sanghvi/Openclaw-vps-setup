@@ -10,8 +10,8 @@ services:
       CLAUDE_WEB_SESSION_KEY: ${CLAUDE_WEB_SESSION_KEY:-}
       CLAUDE_WEB_COOKIE: ${CLAUDE_WEB_COOKIE:-}
     volumes:
-      - ${OPENCLAW_CONFIG_DIR}:/home/node/.openclaw
-      - ${OPENCLAW_WORKSPACE_DIR}:/home/node/.openclaw/workspace
+      - ${OPENCLAW_CONFIG_DIR:-./openclaw-config}:/home/node/.openclaw
+      - ${OPENCLAW_WORKSPACE_DIR:-./openclaw-workspace}:/home/node/.openclaw/workspace
       ## --- ADVANCED: SANDBOX ISOLATION (DOCKER-IN-DOCKER) ---
       ## The lines below are UNCOMMENTED to allow OpenClaw to create temporary Docker
       ## containers to run code (like Python scripts) safely.
@@ -66,7 +66,7 @@ services:
       start_period: 20s
 
   openclaw-cli:
-    image: ${OPENCLAW_IMAGE:-openclaw:local}
+    image: ${OPENCLAW_IMAGE:-ghcr.io/openclaw/openclaw:latest}
     network_mode: "service:openclaw-gateway"
     cap_drop:
       - NET_RAW
@@ -83,8 +83,8 @@ services:
       CLAUDE_WEB_SESSION_KEY: ${CLAUDE_WEB_SESSION_KEY:-}
       CLAUDE_WEB_COOKIE: ${CLAUDE_WEB_COOKIE:-}
     volumes:
-      - ${OPENCLAW_CONFIG_DIR}:/home/node/.openclaw
-      - ${OPENCLAW_WORKSPACE_DIR}:/home/node/.openclaw/workspace
+      - ${OPENCLAW_CONFIG_DIR:-./openclaw-config}:/home/node/.openclaw
+      - ${OPENCLAW_WORKSPACE_DIR:-./openclaw-workspace}:/home/node/.openclaw/workspace
     stdin_open: true
     tty: true
     init: true
@@ -101,7 +101,7 @@ services:
   ## OpenAI/Claude APIs, simply delete this entire `ollama:` block (lines 80-86)
   ## and run `docker compose up -d`. Docker will automatically remove it.
   ollama:
-    image: ollama/ollama:latest
+    image: ${OLLAMA_IMAGE:-ollama/ollama:latest}
     container_name: ollama
     restart: unless-stopped
     volumes:

@@ -1,0 +1,4 @@
+.env
+openclaw-config/
+openclaw-workspace/
+ollama-data/

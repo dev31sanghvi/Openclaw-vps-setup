@@ -135,6 +135,6 @@ This usually happens when you're running Docker as root. The folders you created
 
 Fix it by changing ownership:
 ```bash
-chown -R 1000:1000 ~/Tools/openclaw-config ~/Tools/openclaw-workspace
+chown -R 1000:1000 ./openclaw-config ./openclaw-workspace
 docker compose restart
 ```
