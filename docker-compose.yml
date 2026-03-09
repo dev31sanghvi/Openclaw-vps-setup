@@ -1,6 +1,6 @@
 services:
   openclaw-gateway:
-    image: ${OPENCLAW_IMAGE:-openclaw:local}
+    image: ${OPENCLAW_IMAGE:-ghcr.io/openclaw/openclaw:latest}
     environment:
       HOME: /home/node
       TERM: xterm-256color
@@ -14,17 +14,27 @@ services:
       - ${OPENCLAW_WORKSPACE_DIR}:/home/node/.openclaw/workspace
       ## --- ADVANCED: SANDBOX ISOLATION (DOCKER-IN-DOCKER) ---
       ## The lines below are UNCOMMENTED to allow OpenClaw to create temporary Docker
-      ## containers to run code (like Python scripts) safely. 
-      ## WARNING: Giving a container access to docker.sock is essentially giving it 
-      ## ROOT access to your VPS. Only do this if your web port is securely locked 
+      ## containers to run code (like Python scripts) safely.
+      ## WARNING: Giving a container access to docker.sock is essentially giving it
+      ## ROOT access to your VPS. Only do this if your web port is securely locked
       ## down to localhost (127.0.0.1) as configured in the 'ports' section below!
       ## Set DOCKER_GID to the host's docker group GID (run: stat -c '%g' /var/run/docker.sock).
       - /var/run/docker.sock:/var/run/docker.sock
     group_add:
       - "${DOCKER_GID:-999}"
+      ## Required for Chromium/Puppeteer/browser tool to work properly inside Docker
+    shm_size: "2gb"
+    tmpfs:
+      - /dev/shm
+          # Security hardening — drop dangerous capabilities
+    cap_drop:
+      - NET_RAW
+      - NET_ADMIN
+    security_opt:
+      - no-new-privileges:true
     ports:
       ## --- SECURITY: LOCALHOST BINDING ---
-      ## By adding '127.0.0.1:', the OpenClaw Gateway will ONLY listen for connections 
+      ## By adding '127.0.0.1:', the OpenClaw Gateway will ONLY listen for connections
       ## coming from inside the VPS itself. It is INVISIBLE to the public internet.
       ## You MUST use an SSH Tunnel from your computer to access the UI (See README Option A).
       - "127.0.0.1:${OPENCLAW_GATEWAY_PORT:-18789}:18789"
@@ -84,8 +94,8 @@ services:
       - openclaw-gateway
 
   ## --- OPTIONAL: LOCAL AI MODELS (OLLAMA) ---
-  ## This container allows you to run free, local AI models (like Llama 3 or Qwen) 
-  ## directly on your VPS CPU/RAM, keeping everything 100% private. 
+  ## This container allows you to run free, local AI models (like Llama 3 or Qwen)
+  ## directly on your VPS CPU/RAM, keeping everything 100% private.
   ##
   ## HOW TO DISABLE: If you decide local models are too slow or you just want to use
   ## OpenAI/Claude APIs, simply delete this entire `ollama:` block (lines 80-86)
